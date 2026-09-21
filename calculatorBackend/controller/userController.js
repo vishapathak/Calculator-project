@@ -2,7 +2,7 @@ const zo = require('zod');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const connectDB = require('../connectionDB');
-const userSchema = require('../../../counter/CounterBackend/schema/userSchema');
+
 
 const userValidation = zo.object({
 name: zo.string(),
@@ -18,8 +18,8 @@ name: zo.string(),
  async function Registercontroller (req,res){
 
     try {
-        const { userName,email,password} = req.body;
-        if(!userName||!email||!password){
+        const { name, email, password} = req.body;
+        if(!name||!email||!password){
             return res.status(400).json({
                 message:"please provide proper all required fields"
             });
@@ -31,8 +31,8 @@ name: zo.string(),
         }
         const hashedPassword = await bcrypt.hash(password,10);
         const newUser = await connectDB.query(
-            'INSERT INTO users (userName , email ,password) VALUES ($1, $2, $3) RETURNING id, name, email',
-            [userName, email, hashedPassword]
+            'INSERT INTO users (name , email ,password) VALUES ($1, $2, $3) RETURNING id, name, email',
+            [name, email, hashedPassword]
         );
         return res.status(201).json({ user : newUser.rows[0]})  
     
