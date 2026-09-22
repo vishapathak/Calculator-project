@@ -1,9 +1,45 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import {Route, BrowserRouter as Router, Routes} from "react-router-dom";
+import { Navbar } from './Component/Navbar';
+import Register from './pages/Register';
+import Login from './pages/login';
+import axios from "axios";
+import Calculator from './pages/Calculator';
+const  App = () => {
+  const [ user , setUser] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-const  welcome = () => {
+  useEffect(() =>{
+    const fetchUser = async () => {
+      try {
+      const res = await axios.get("http://localhost:8000/v1/Calculator");
+      setUser(res.data);
+    } catch (error) {
+      setUser(null);
+      setError("Unable to fetch user");
+    }
+    finally{
+      setLoading(false);
+    }
+    };
+    fetchUser()
+  },[]);
+
+  if(loading){
+    return <div>Loading...</div>
+  }
+
   return (
-    <div className='m-8 p-6 text-2xl font-bold'>welcome</div>
+    <Router>
+      <Navbar />
+      <Routes>
+      <Route path='/calculator' element={< Calculator/>}></Route>
+      <Route path='/login' element={<Login setUser ={setUser}/>}></Route>
+      <Route path='/register' element={< Register/>}></Route>
+      </Routes>
+    </Router>
   )
 }
 
-export default welcome
+export default App;
