@@ -17,12 +17,13 @@ const Login = ({ setUser }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/vi/calculator/login",
+        "http://localhost:8000/v1/calculator/login",
         form
       );
 
-      setUser(res.data);
-      navigate("/home");
+      setUser(res.data.token);
+      localStorage.setItem("token",res.data.user.token)
+      navigate("/calculator");
     } catch (error) {
       setError("Invalid email or password");
     }

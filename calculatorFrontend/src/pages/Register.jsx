@@ -15,15 +15,15 @@ const Register = ({ setUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const res = await axios.post(
-        "http://localhost:5000/v1/calculator/register",
+        "http://localhost:8000/v1/calculator/register",
         form
       );
 
-      setUser(res.data);
-      navigate("/home");
+      setUser(res.data.user);
+      localStorage.setItem("token", res.data.user.token);
+      navigate("/calculator");
     } catch (error) {
       setError("Registration failed");
     }

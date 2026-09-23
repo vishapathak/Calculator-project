@@ -34,7 +34,11 @@ name: zo.string(),
             'INSERT INTO users (name , email ,password) VALUES ($1, $2, $3) RETURNING id, name, email',
             [name, email, hashedPassword]
         );
-        return res.status(201).json({ user : newUser.rows[0]})  
+        const token = jwt.sign({id: newUser.id}, process.env.SECRET)
+        return res.status(201).json({ message : `${newUser} Register successfully`,
+            token ,
+            user : newUser.rows[0]})  
+
     
     } catch (error) {
         res.status(501).json({
@@ -62,11 +66,15 @@ try {
     if (!validUser){
         return res.status(400).json({
             message:"invalid credentials"
-        });
-    }res.json({
+        }); 
+    }
+    const token = jwt.sign({id:user.id},process.env.SECRET); 
+    console.log("token",token);
+    res.json({
         user:{id: userData.id,
             name:userData.userName,
-            email:userData.email
+            email:userData.email,
+            token:token
         }
     })
 
