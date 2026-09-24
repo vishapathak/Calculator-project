@@ -14,9 +14,11 @@ async function auth (req ,res, next) {
             })
         }
         const decode = jwt.verify(token,secret);
+        console.log("decode",decode);
         //const userId = req.params.id;
         const id = decode.id;
-        let user = await connectDB.query("SELECT id ,name, email FROM users WHERE id = $1",[id]);
+        console.log("user id from token:", id);
+        const user = await connectDB.query("SELECT id ,name, email FROM users WHERE id = $1",[id]);
         if(user.rowCount === 0){
             return res.status(400).json({
                 error:true,
@@ -24,7 +26,9 @@ async function auth (req ,res, next) {
                 message: "User not found-middleware"
             })
         }
-        req.user = user.rows[0];
+
+console.log("user from database:", user.rows[0]);
+        req.user = user.rows[0];// maatlab kya hai or kyu use hua hai
         next();
     } catch (error) {
         res.status(500).json({

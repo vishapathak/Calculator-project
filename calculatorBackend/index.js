@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const route = require("./router/userRouter");
-
+const {calculateroute} = require("./router/calculatezrouter")
 const app = express();
 
 app.use(cors({
@@ -14,6 +14,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use("/v1/calculator", route);
+app.use("/v1/calculator", calculateroute);
 
 const port = process.env.PORT || 8080;
 

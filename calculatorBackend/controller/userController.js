@@ -68,11 +68,11 @@ try {
             message:"invalid credentials"
         }); 
     }
-    const token = jwt.sign({id:user.id},process.env.SECRET); 
+    const token = jwt.sign({id:userData.id},process.env.SECRET); 
     console.log("token",token);
     res.json({
-        user:{id: userData.id,
-            name:userData.userName,
+        user:{id:userData.id,
+            name:userData.name,
             email:userData.email,
             token:token
         }
