@@ -1,0 +1,112 @@
+const zo = require('zod');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const connectDB = require('../connectionDB');
+
+
+const userValidation = zo.object({
+name: zo.string(),
+  email: zo.string(),
+  password: zo
+    .string()
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/, {
+      error: "password must consist of letter, special character and number",
+    })
+
+});
+
+ async function Registercontroller(req, res) {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Please provide all required fields"
+      });
+    }
+
+    const userExists = await connectDB.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (userExists.rows.length > 0) {
+      return res.status(400).json({
+        message: "User already exists"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await connectDB.query(
+      `INSERT INTO users (name, email, password)
+       VALUES ($1, $2, $3)
+       RETURNING id, name, email`,
+      [name, email, hashedPassword]
+    );
+
+    const token = jwt.sign(
+      { id: newUser.rows[0].id },
+      process.env.SECRET
+    );
+
+    return res.status(201).json({
+      message: "Register successfully",
+
+      user: {
+        id: newUser.rows[0].id,
+        name: newUser.rows[0].name,
+        email: newUser.rows[0].email,
+        token: token
+      }
+    });
+
+  } catch (error) {
+    console.log("REGISTER ERROR:", error);
+
+    return res.status(500).json({
+      message: "Error in user registration",
+      error: error.message
+    });
+  }
+}
+
+async function login(req,res){
+try {
+    const {email ,password} = req.body;
+    if(!email || !password){
+        return res.status(400).json({
+            messaage:'plaese provide the valid information'
+        });
+    }
+    const user = await connectDB.query('SELECT * FROM users WHERE email =$1',[email]);
+    if(user.rows.length === 0){
+        return res.status(400).json({message:'invalid credentials'})
+    }
+    const userData = user.rows[0];
+    const validUser = await bcrypt.compare(password, userData.password);
+
+    if (!validUser){
+        return res.status(400).json({
+            message:"invalid credentials"
+        }); 
+    }
+    const token = jwt.sign({id:userData.id},process.env.SECRET); 
+    console.log("token",token);
+    res.json({
+        user:{id:userData.id,
+            name:userData.name,
+            email:userData.email,
+            token:token
+        }
+    })
+
+} catch (error) {
+    res.status(501).json({
+            message:"Error in user Registratin",
+            error:error.message,
+        })
+}
+}
+
+module.exports = { Registercontroller, login};
