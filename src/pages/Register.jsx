@@ -15,16 +15,27 @@ const Register = ({ setUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await axios.post(
-        "http://localhost:5000/v1/calculator/register",
-        form
-      );
+    const API_URL = import.meta.env.VITE_API_URL;
+    const res = await axios.post(
+  `${API_URL}/v1/calculator/register`,
+  form
+);
 
-      setUser(res.data);
-      navigate("/home");
-    } catch (error) {
+console.log("REGISTER RESPONSE:", res.data);
+
+setUser(res.data.user);
+
+localStorage.setItem("token", res.data.user.token);
+
+console.log(
+  "TOKEN SAVED:",
+  localStorage.getItem("token")
+);
+
+navigate("/calculator");
+    } 
+    catch (error) {
       setError("Registration failed");
     }
   };

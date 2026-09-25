@@ -1,9 +1,32 @@
 
 import React, { useState } from "react";
+import { useEffect } from "react";
+import axios from "axios";
 
 const Calculator= () => {
   const [display, setDisplay] = useState("");
 
+  useEffect(() =>{
+    const getLastCalculation = async() =>{
+      try {
+        const token = localStorage.getItem("token");
+         const API_URL = import.meta.env.VITE_API_URL;
+        const res = await axios.get(
+          `${API_URL}/v1/calculator/getCalculation`,
+          {headers:{
+            auth:token,
+          },
+        }
+        );
+        setDisplay(res.data.calculation.result);
+      } catch (error) {
+        console.log("No previous Calculation");
+      }
+    };
+
+    getLastCalculation();
+
+  },[]);
   const handleClick = (value) => {
     setDisplay(display + value);
   };
@@ -12,11 +35,35 @@ const Calculator= () => {
     setDisplay("");
   };
 
-  const handleEqual = () => {
+  const handleEqual =async() => {
     try {
-      setDisplay(String(eval(display)));
+      const expression = display;
+
+   if (!/^[0-9+\-*/().\s]+$/.test(expression)) {
+    console.log("Invalid expression");
+    return;
+    }
+
+
+      const result = String(eval(expression));
+      setDisplay(result);
+      const token = localStorage.getItem("token");
+      const API_URL = import.meta.env.VITE_API_URL;
+      await axios.post(`${API_URL}/v1/calculator/saveCalculation`,
+          {
+            expression:expression,
+            result:result
+          },
+          {
+            headers:{
+              auth : token,
+            }
+          }
+      );
     } catch (error) {
-      setDisplay("Error");
+      setDisplay("0");
+      console.log("BACKEND ERROR:", error.response?.data);
+      console.log(error);
     }
   };
 

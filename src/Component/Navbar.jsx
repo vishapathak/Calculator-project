@@ -21,7 +21,7 @@ export const Navbar = () => {
 
           <Link
             to="/login"
-            className="hover:text-blue-200 transition"
+            className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
           >
             Login
           </Link>

@@ -16,13 +16,15 @@ const Login = ({ setUser }) => {
     e.preventDefault();
 
     try {
+      const API_URL = import.meta.env.VITE_API_URL;
       const res = await axios.post(
-        "http://localhost:5000/vi/calculator/login",
+       `${API_URL}/v1/calculator/login`,
         form
       );
-
-      setUser(res.data);
-      navigate("/home");
+      console.log("login response",res.data)
+      setUser(res.data.user);
+      localStorage.setItem("token",res.data.user.token);
+      navigate("/calculator");
     } catch (error) {
       setError("Invalid email or password");
     }
